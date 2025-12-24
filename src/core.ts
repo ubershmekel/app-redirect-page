@@ -1,8 +1,8 @@
 export type FallbackMode = "buttons" | "none";
 
 export type Options = {
-  iosUrl: string;
-  androidUrl: string;
+  iosUrl?: string;
+  androidUrl?: string;
 
   // behavior
   fallback?: FallbackMode; // default "buttons"
@@ -103,7 +103,40 @@ function renderButtons(
   target.appendChild(container);
 }
 
+export function parseScriptOptions(script: HTMLScriptElement): Options {
+  const iosUrl = script.dataset.ios;
+  const androidUrl = script.dataset.android;
+  const fallback = (script.dataset.fallback as any) || "buttons";
+  const target = script.dataset.target || undefined;
+  const delayMs = script.dataset.delay ? Number(script.dataset.delay) : 0;
+  const redirect = script.dataset.redirect
+    ? script.dataset.redirect !== "false"
+    : true;
+
+  const heading = script.dataset.heading || "Get the app";
+  const iosLabel = script.dataset.iosLabel || "Download on the App Store";
+  const androidLabel = script.dataset.androidLabel || "Get it on Google Play";
+
+  const openInNewTab = script.dataset.newtab === "true";
+
+  const opts: Options = {
+    iosUrl,
+    androidUrl,
+    fallback,
+    target,
+    delayMs,
+    redirect,
+    heading,
+    iosLabel,
+    androidLabel,
+    openInNewTab,
+  };
+
+  return opts;
+}
+
 export function redirectOrRender(options: Options) {
+  // override defaults
   const opts: Required<Options> = {
     fallback: "buttons",
     target: document.body,
@@ -113,28 +146,12 @@ export function redirectOrRender(options: Options) {
     iosLabel: "Download on the App Store",
     androidLabel: "Get it on Google Play",
     openInNewTab: false,
+    androidUrl: "",
+    iosUrl: "",
     ...options,
   };
 
   const targetEl = resolveTarget(opts.target);
-
-  if (!opts.redirect) {
-    if (opts.fallback === "buttons") {
-      renderButtons(targetEl, {
-        heading: opts.heading,
-        iosLabel: opts.iosLabel,
-        androidLabel: opts.androidLabel,
-        iosUrl: opts.iosUrl,
-        androidUrl: opts.androidUrl,
-        openInNewTab: opts.openInNewTab,
-      });
-    }
-    return;
-  }
-
-  const os = detectOs();
-  if (os === "ios") return doRedirect(opts.iosUrl, opts.delayMs);
-  if (os === "android") return doRedirect(opts.androidUrl, opts.delayMs);
 
   if (opts.fallback === "buttons") {
     renderButtons(targetEl, {
@@ -146,4 +163,13 @@ export function redirectOrRender(options: Options) {
       openInNewTab: opts.openInNewTab,
     });
   }
+  if (opts.redirect) {
+    return detectOsRedirect(opts);
+  }
+}
+
+function detectOsRedirect(opts: Required<Options>) {
+  const os = detectOs();
+  if (os === "ios") return doRedirect(opts.iosUrl, opts.delayMs);
+  if (os === "android") return doRedirect(opts.androidUrl, opts.delayMs);
 }

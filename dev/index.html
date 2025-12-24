@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>app-redirect-page dev</title>
+    <style>
+      body {
+        font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+        padding: 24px;
+        background: #f5f7fb;
+        color: #0f172a;
+        max-width: 720px;
+        margin: 0 auto;
+      }
+
+      h1 {
+        margin: 0 0 12px;
+        font-size: 28px;
+      }
+
+      p {
+        margin: 0 0 10px;
+        line-height: 1.5;
+      }
+
+      code {
+        background: #e2e8f0;
+        padding: 2px 6px;
+        border-radius: 6px;
+        font-size: 14px;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>app-redirect-page dev</h1>
+    <p>
+      This page loads the snippet from <code>dist/redirect-now.iife.js</code>.
+      On mobile, you should see an immediate redirect; on desktop you should see
+      the fallback buttons.
+    </p>
+    <p>
+      To avoid navigating away while debugging, switch
+      <code>data-redirect</code> to <code>false</code> in this file.
+    </p>
+
+    <div id="app-links"></div>
+
+    <script
+      src="../dist/redirect-now.iife.js"
+      data-ios="https://apps.apple.com/us/app/kat-and-noodles/id6755672232"
+      data-android="https://play.google.com/store/apps/details?id=com.andluck.zensnake"
+      data-fallback="buttons"
+      data-target="#app-links"
+      data-delay="1500"
+      data-heading="Get the app"
+    ></script>
+  </body>
+</html>

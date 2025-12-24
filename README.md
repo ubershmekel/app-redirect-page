@@ -17,3 +17,12 @@ Pages.
   data-target="#app-links"
 ></script>
 ```
+
+## Develop locally
+
+- Install deps: `npm install`
+- Start the watcher + preview page: `npm run dev`
+- Open `http://localhost:4173/dev/` to see the snippet from
+  `dist/redirect-now.iife.js` included in an HTML page. Mobile should redirect;
+  desktop shows the fallback buttons. Edit `dev/index.html` to tweak the sample
+  attributes.
