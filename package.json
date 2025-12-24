@@ -1,0 +1,14 @@
+{
+  "name": "app-redirect-page",
+  "version": "1.0.0",
+  "description": "A snippet to turn a page into an app redirect page",
+  "main": "src/index.ts",
+  "scripts": {
+    "build": "tsdown src/redirect-now.ts"
+  },
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "tsdown": "^0.18.3"
+  }
+}

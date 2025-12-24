@@ -1,0 +1,149 @@
+export type FallbackMode = "buttons" | "none";
+
+export type Options = {
+  iosUrl: string;
+  androidUrl: string;
+
+  // behavior
+  fallback?: FallbackMode; // default "buttons"
+  target?: string | Element; // default document.body
+  delayMs?: number; // default 0
+  redirect?: boolean; // default true; if false, always render buttons
+
+  // copy / UI
+  heading?: string; // default "Get the app"
+  iosLabel?: string; // default "Download on the App Store"
+  androidLabel?: string; // default "Get it on Google Play"
+  openInNewTab?: boolean; // default false
+};
+
+export function detectOs(): "ios" | "android" | "other" {
+  const ua = navigator.userAgent || "";
+  const isAndroid = /Android/i.test(ua);
+
+  // iPadOS 13+ can report MacIntel; catch touch-capable iPads
+  const isIOS =
+    /iPhone|iPad|iPod/i.test(ua) ||
+    (navigator.platform === "MacIntel" &&
+      (navigator as any).maxTouchPoints > 1);
+
+  if (isAndroid) return "android";
+  if (isIOS) return "ios";
+  return "other";
+}
+
+function resolveTarget(target?: string | Element): Element {
+  if (!target) return document.body;
+  if (typeof target === "string")
+    return document.querySelector(target) ?? document.body;
+  return target;
+}
+
+function doRedirect(url: string, delayMs: number) {
+  if (delayMs > 0) setTimeout(() => window.location.replace(url), delayMs);
+  else window.location.replace(url);
+}
+
+function renderButtons(
+  target: Element,
+  opts: Required<
+    Pick<
+      Options,
+      | "heading"
+      | "iosLabel"
+      | "androidLabel"
+      | "iosUrl"
+      | "androidUrl"
+      | "openInNewTab"
+    >
+  >
+) {
+  const container = document.createElement("div");
+  container.setAttribute("data-app-redirect-page", "fallback");
+
+  // minimal inline styling so it looks decent anywhere
+  container.style.fontFamily =
+    "system-ui, -apple-system, Segoe UI, Roboto, sans-serif";
+  container.style.maxWidth = "560px";
+  container.style.margin = "24px auto";
+  container.style.padding = "16px";
+  container.style.border = "1px solid rgba(0,0,0,0.12)";
+  container.style.borderRadius = "12px";
+
+  const h = document.createElement("div");
+  h.textContent = opts.heading;
+  h.style.fontSize = "18px";
+  h.style.fontWeight = "650";
+  h.style.marginBottom = "12px";
+
+  const mk = (href: string, label: string) => {
+    const a = document.createElement("a");
+    a.href = href;
+    a.textContent = label;
+    a.style.display = "block";
+    a.style.padding = "12px 14px";
+    a.style.margin = "10px 0";
+    a.style.borderRadius = "10px";
+    a.style.textDecoration = "none";
+    a.style.border = "1px solid rgba(0,0,0,0.14)";
+    a.style.background = "rgba(0,0,0,0.03)";
+    a.style.color = "inherit";
+    if (opts.openInNewTab) {
+      a.target = "_blank";
+      a.rel = "noopener noreferrer";
+    }
+    return a;
+  };
+
+  container.appendChild(h);
+  container.appendChild(mk(opts.iosUrl, opts.iosLabel));
+  container.appendChild(mk(opts.androidUrl, opts.androidLabel));
+
+  target.innerHTML = "";
+  target.appendChild(container);
+}
+
+export function redirectOrRender(options: Options) {
+  const opts: Required<Options> = {
+    fallback: "buttons",
+    target: document.body,
+    delayMs: 0,
+    redirect: true,
+    heading: "Get the app",
+    iosLabel: "Download on the App Store",
+    androidLabel: "Get it on Google Play",
+    openInNewTab: false,
+    ...options,
+  };
+
+  const targetEl = resolveTarget(opts.target);
+
+  if (!opts.redirect) {
+    if (opts.fallback === "buttons") {
+      renderButtons(targetEl, {
+        heading: opts.heading,
+        iosLabel: opts.iosLabel,
+        androidLabel: opts.androidLabel,
+        iosUrl: opts.iosUrl,
+        androidUrl: opts.androidUrl,
+        openInNewTab: opts.openInNewTab,
+      });
+    }
+    return;
+  }
+
+  const os = detectOs();
+  if (os === "ios") return doRedirect(opts.iosUrl, opts.delayMs);
+  if (os === "android") return doRedirect(opts.androidUrl, opts.delayMs);
+
+  if (opts.fallback === "buttons") {
+    renderButtons(targetEl, {
+      heading: opts.heading,
+      iosLabel: opts.iosLabel,
+      androidLabel: opts.androidLabel,
+      iosUrl: opts.iosUrl,
+      androidUrl: opts.androidUrl,
+      openInNewTab: opts.openInNewTab,
+    });
+  }
+}
