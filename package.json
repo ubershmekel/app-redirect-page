@@ -9,7 +9,7 @@
     "serve": "http-server . -p 4173 -c-1",
     "dev": "concurrently \"npm:build:watch\" \"npm:serve\""
   },
-  "author": "",
+  "author": "ubershmekel <ubershmekel@gmail.com>",
   "license": "MIT",
   "devDependencies": {
     "concurrently": "^9.2.1",

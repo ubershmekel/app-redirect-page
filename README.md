@@ -7,14 +7,10 @@ Pages.
 ## Quick start (no build tools)
 
 ```html
-<div id="app-links"></div>
-
 <script
-  src="https://cdn.jsdelivr.net/npm/app-redirect-page@1/dist/snippet.min.js"
-  data-ios="https://apps.apple.com/app/idYOUR_APP_ID"
-  data-android="https://play.google.com/store/apps/details?id=YOUR.PACKAGE"
-  data-fallback="buttons"
-  data-targetselector="#app-links"
+  src="https://cdn.jsdelivr.net/npm/app-redirect-page@1/dist/app-redirect-page.js"
+  data-ios="YOUR_IOS_APP_LINK"
+  data-android="YOUR_ANDROID_APP_LINK"
 ></script>
 ```
 
