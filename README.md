@@ -14,7 +14,7 @@ Pages.
   data-ios="https://apps.apple.com/app/idYOUR_APP_ID"
   data-android="https://play.google.com/store/apps/details?id=YOUR.PACKAGE"
   data-fallback="buttons"
-  data-target="#app-links"
+  data-targetselector="#app-links"
 ></script>
 ```
 
@@ -23,6 +23,6 @@ Pages.
 - Install deps: `npm install`
 - Start the watcher + preview page: `npm run dev`
 - Open `http://localhost:4173/dev/` to see the snippet from
-  `dist/redirect-now.iife.js` included in an HTML page. Mobile should redirect;
+  `dist/app-redirect-page.js` included in an HTML page. Mobile should redirect;
   desktop shows the fallback buttons. Edit `dev/index.html` to tweak the sample
   attributes.

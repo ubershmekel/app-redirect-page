@@ -6,8 +6,8 @@ export type Options = {
 
   // behavior
   fallback?: FallbackMode; // default "buttons"
-  target?: string | Element; // default document.body
-  delayMs?: number; // default 0
+  targetSelector?: string | Element; // default document.body
+  delayMs?: number; // time until redirect occurs in ms, default 0
   redirect?: boolean; // default true; if false, always render buttons
 
   // copy / UI
@@ -32,11 +32,11 @@ export function detectOs(): "ios" | "android" | "other" {
   return "other";
 }
 
-function resolveTarget(target?: string | Element): Element {
-  if (!target) return document.body;
-  if (typeof target === "string")
-    return document.querySelector(target) ?? document.body;
-  return target;
+function resolveTargetSelector(targetSelector?: string | Element): Element {
+  if (!targetSelector) return document.body;
+  if (typeof targetSelector === "string")
+    return document.querySelector(targetSelector) ?? document.body;
+  return targetSelector;
 }
 
 function doRedirect(url: string, delayMs: number) {
@@ -107,8 +107,8 @@ export function parseScriptOptions(script: HTMLScriptElement): Options {
   const iosUrl = script.dataset.ios;
   const androidUrl = script.dataset.android;
   const fallback = (script.dataset.fallback as any) || "buttons";
-  const target = script.dataset.target || undefined;
-  const delayMs = script.dataset.delay ? Number(script.dataset.delay) : 0;
+  const targetSelector = script.dataset.targetSelector || undefined;
+  const delayMs = script.dataset.delayms ? Number(script.dataset.delayms) : 0;
   const redirect = script.dataset.redirect
     ? script.dataset.redirect !== "false"
     : true;
@@ -123,7 +123,7 @@ export function parseScriptOptions(script: HTMLScriptElement): Options {
     iosUrl,
     androidUrl,
     fallback,
-    target,
+    targetSelector,
     delayMs,
     redirect,
     heading,
@@ -139,11 +139,11 @@ export function redirectOrRender(options: Options) {
   // override defaults
   const opts: Required<Options> = {
     fallback: "buttons",
-    target: document.body,
+    targetSelector: document.body,
     delayMs: 0,
     redirect: true,
     heading: "Get the app",
-    iosLabel: "Download on the App Store",
+    iosLabel: "Download on the Apple App Store",
     androidLabel: "Get it on Google Play",
     openInNewTab: false,
     androidUrl: "",
@@ -151,7 +151,7 @@ export function redirectOrRender(options: Options) {
     ...options,
   };
 
-  const targetEl = resolveTarget(opts.target);
+  const targetEl = resolveTargetSelector(opts.targetSelector);
 
   if (opts.fallback === "buttons") {
     renderButtons(targetEl, {

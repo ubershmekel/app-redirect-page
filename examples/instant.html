@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>app-redirect-page dev</title>
+    <link
+      rel="stylesheet"
+      href="https://edwardtufte.github.io/tufte-css/tufte.css"
+      type="text/css"
+    />
+  </head>
+  <body>
+    <h1>app-redirect-page instant test</h1>
+    <p>
+      This page loads the snippet from <code>dist/app-redirect-page.js</code>.
+      On mobile, you should see an immediate redirect; on desktop you should see
+      the fallback buttons.
+    </p>
+    <p>
+      To avoid navigating away while debugging, switch
+      <code>data-redirect</code> to <code>false</code> in this file.
+    </p>
+
+    <div id="app-links"></div>
+
+    <script
+      src="../dist/app-redirect-page.js"
+      data-ios="https://apps.apple.com/us/app/kat-and-noodles/id6755672232"
+      data-android="https://play.google.com/store/apps/details?id=com.andluck.zensnake"
+    ></script>
+  </body>
+</html>
