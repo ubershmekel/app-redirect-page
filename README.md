@@ -15,7 +15,7 @@ Pages.
 ```
 
 Here's a working example you can
-[see at this page](https://ubershmekel.github.io/zensnake/app.html):
+[see at this page](https://ubershmekel.github.io/zensnake/app/):
 
 ```html
 <script
@@ -23,10 +23,12 @@ Here's a working example you can
   data-ios="https://apps.apple.com/us/app/kat-and-noodles/id6755672232"
   data-android="https://play.google.com/store/apps/details?id=com.andluck.zensnake"
 ></script>
-
-## Develop locally - Install deps: `npm install` - Start the watcher + preview
-page: `npm run dev` - Open `http://localhost:4173/dev/` to see the snippet from
-`dist/app-redirect-page.js` included in an HTML page. Mobile should redirect;
-desktop shows the fallback buttons. Edit `dev/index.html` to tweak the sample
-attributes.
 ```
+
+## Develop locally
+
+- Install deps: `npm install`
+- Start the watcher + preview page: `npm run dev`
+- Open `http://localhost:4173/examples/` to see the snippet in action.
+- The src in the examples is `dist/app-redirect-page.js`.
+- Mobile redirects; desktop shows the fallback buttons.
