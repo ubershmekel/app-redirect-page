@@ -1,10 +1,11 @@
 # app-redirect-page
 
 A drop-in `<script>` that redirects iOS → App Store, Android → Play Store, and
-shows fallback buttons on unknown OS (desktop, bots, etc). Perfect for GitHub
-Pages.
+shows fallback buttons otherwise (desktop, bots, etc). Perfect for GitHub Pages.
 
-## Quick start (no build tools)
+## Quick start
+
+Drop this into the `<body>` of your app redirect page:
 
 ```html
 <script

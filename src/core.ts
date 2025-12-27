@@ -90,8 +90,8 @@ function renderButtons(
       Options,
       | "heading"
       | "iosLabel"
-      | "androidLabel"
       | "iosUrl"
+      | "androidLabel"
       | "androidUrl"
       | "openInNewTab"
     >
