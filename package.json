@@ -1,6 +1,6 @@
 {
   "name": "app-redirect-page",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "A snippet to turn a page into an app redirect page",
   "main": "src/index.ts",
   "scripts": {
@@ -8,6 +8,7 @@
     "build:watch": "tsdown --sourcemap --watch",
     "serve": "http-server . -p 4173 -c-1",
     "dev": "concurrently \"npm:build:watch\" \"npm:serve\"",
+    "release": "node scripts/release.js",
     "prepublishOnly": "npm run build"
   },
   "files": [
