@@ -44,6 +44,45 @@ function doRedirect(url: string, delayMs: number) {
   else window.location.replace(url);
 }
 
+function resolveBadgeSrc(filename: string) {
+  const script = document.currentScript as HTMLScriptElement | null;
+  if (script?.src) {
+    return new URL(`../images/${filename}`, script.src).toString();
+  }
+  return `images/${filename}`;
+}
+
+function createBadgeLink(
+  href: string,
+  label: string,
+  imageFilename: string,
+  openInNewTab: boolean
+) {
+  const a = document.createElement("a");
+  a.href = href;
+  a.setAttribute("aria-label", label);
+  a.style.display = "block";
+  a.style.padding = "8px 0";
+  a.style.margin = "10px 0";
+  a.style.borderRadius = "10px";
+  a.style.textDecoration = "none";
+  a.style.border = "1px solid transparent";
+  a.style.background = "transparent";
+  a.style.color = "inherit";
+  if (openInNewTab) {
+    a.target = "_blank";
+    a.rel = "noopener noreferrer";
+  }
+  const img = document.createElement("img");
+  img.src = resolveBadgeSrc(imageFilename);
+  img.alt = label;
+  img.style.display = "block";
+  img.style.height = "74px";
+  img.style.width = "auto";
+  a.appendChild(img);
+  return a;
+}
+
 function renderButtons(
   target: Element,
   opts: Required<
@@ -58,14 +97,6 @@ function renderButtons(
     >
   >
 ) {
-  const badgeSrc = (filename: string) => {
-    const script = document.currentScript as HTMLScriptElement | null;
-    if (script?.src) {
-      return new URL(`../images/${filename}`, script.src).toString();
-    }
-    return `images/${filename}`;
-  };
-
   const container = document.createElement("div");
   container.setAttribute("data-app-redirect-page", "fallback");
 
@@ -84,43 +115,27 @@ function renderButtons(
   h.style.fontWeight = "650";
   h.style.marginBottom = "12px";
 
-  const mk = (href: string, label: string, imageFilename: string) => {
-    const a = document.createElement("a");
-    a.href = href;
-    a.setAttribute("aria-label", label);
-    a.style.display = "block";
-    a.style.padding = "8px 0";
-    a.style.margin = "10px 0";
-    a.style.borderRadius = "10px";
-    a.style.textDecoration = "none";
-    a.style.border = "1px solid transparent";
-    a.style.background = "transparent";
-    a.style.color = "inherit";
-    if (opts.openInNewTab) {
-      a.target = "_blank";
-      a.rel = "noopener noreferrer";
-    }
-    const img = document.createElement("img");
-    img.src = badgeSrc(imageFilename);
-    img.alt = label;
-    img.style.display = "block";
-    img.style.height = "74px";
-    img.style.width = "auto";
-    a.appendChild(img);
-    return a;
-  };
-
   container.appendChild(h);
-  container.appendChild(
-    mk(opts.iosUrl, opts.iosLabel, "Download_on_the_App_Store_Badge.svg")
-  );
-  container.appendChild(
-    mk(
-      opts.androidUrl,
-      opts.androidLabel,
-      "GetItOnGooglePlay_Badge_Web_color_English.svg"
-    )
-  );
+  if (opts.iosUrl) {
+    container.appendChild(
+      createBadgeLink(
+        opts.iosUrl,
+        opts.iosLabel,
+        "Download_on_the_App_Store_Badge.svg",
+        opts.openInNewTab
+      )
+    );
+  }
+  if (opts.androidUrl) {
+    container.appendChild(
+      createBadgeLink(
+        opts.androidUrl,
+        opts.androidLabel,
+        "GetItOnGooglePlay_Badge_Web_color_English.svg",
+        opts.openInNewTab
+      )
+    );
+  }
 
   target.innerHTML = "";
   target.appendChild(container);
