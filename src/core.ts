@@ -58,6 +58,14 @@ function renderButtons(
     >
   >
 ) {
+  const badgeSrc = (filename: string) => {
+    const script = document.currentScript as HTMLScriptElement | null;
+    if (script?.src) {
+      return new URL(`../images/${filename}`, script.src).toString();
+    }
+    return `images/${filename}`;
+  };
+
   const container = document.createElement("div");
   container.setAttribute("data-app-redirect-page", "fallback");
 
@@ -76,28 +84,43 @@ function renderButtons(
   h.style.fontWeight = "650";
   h.style.marginBottom = "12px";
 
-  const mk = (href: string, label: string) => {
+  const mk = (href: string, label: string, imageFilename: string) => {
     const a = document.createElement("a");
     a.href = href;
-    a.textContent = label;
+    a.setAttribute("aria-label", label);
     a.style.display = "block";
-    a.style.padding = "12px 14px";
+    a.style.padding = "8px 0";
     a.style.margin = "10px 0";
     a.style.borderRadius = "10px";
     a.style.textDecoration = "none";
-    a.style.border = "1px solid rgba(0,0,0,0.14)";
-    a.style.background = "rgba(0,0,0,0.03)";
+    a.style.border = "1px solid transparent";
+    a.style.background = "transparent";
     a.style.color = "inherit";
     if (opts.openInNewTab) {
       a.target = "_blank";
       a.rel = "noopener noreferrer";
     }
+    const img = document.createElement("img");
+    img.src = badgeSrc(imageFilename);
+    img.alt = label;
+    img.style.display = "block";
+    img.style.height = "74px";
+    img.style.width = "auto";
+    a.appendChild(img);
     return a;
   };
 
   container.appendChild(h);
-  container.appendChild(mk(opts.iosUrl, opts.iosLabel));
-  container.appendChild(mk(opts.androidUrl, opts.androidLabel));
+  container.appendChild(
+    mk(opts.iosUrl, opts.iosLabel, "Download_on_the_App_Store_Badge.svg")
+  );
+  container.appendChild(
+    mk(
+      opts.androidUrl,
+      opts.androidLabel,
+      "GetItOnGooglePlay_Badge_Web_color_English.svg"
+    )
+  );
 
   target.innerHTML = "";
   target.appendChild(container);

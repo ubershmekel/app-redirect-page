@@ -13,7 +13,9 @@
   "files": [
     "dist",
     "README.md",
-    "LICENSE"
+    "LICENSE",
+    "src",
+    "images"
   ],
   "author": "Yuval Greenfield <ubershmekel@gmail.com>",
   "license": "MIT",
