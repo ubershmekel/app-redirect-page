@@ -6,7 +6,7 @@ export type Options = {
 
   // behavior
   fallback?: FallbackMode; // default "buttons"
-  targetSelector?: string | Element; // default document.body
+  targetSelector?: string | Element; // default: new element after current <script>
   delayMs?: number; // time until redirect occurs in ms, default 0
   redirect?: boolean; // default true; if false, always render buttons
 
@@ -16,6 +16,8 @@ export type Options = {
   androidLabel?: string; // default "Get it on Google Play"
   openInNewTab?: boolean; // default false
 };
+
+type NormalizedOptions = Required<Options> & { targetSelector: Element };
 
 export function detectOs(): "ios" | "android" | "other" {
   const ua = navigator.userAgent || "";
@@ -33,9 +35,19 @@ export function detectOs(): "ios" | "android" | "other" {
 }
 
 function resolveTargetSelector(targetSelector?: string | Element): Element {
-  if (!targetSelector) return document.body;
-  if (typeof targetSelector === "string")
+  if (!targetSelector) {
+    const script = document.currentScript as HTMLScriptElement | null;
+    const container = document.createElement("div");
+    if (script?.parentNode) {
+      script.parentNode.insertBefore(container, script.nextSibling);
+    } else {
+      document.body.appendChild(container);
+    }
+    return container;
+  }
+  if (typeof targetSelector === "string") {
     return document.querySelector(targetSelector) ?? document.body;
+  }
   return targetSelector;
 }
 
@@ -141,55 +153,50 @@ function renderButtons(
   target.appendChild(container);
 }
 
-export function parseScriptOptions(script: HTMLScriptElement): Options {
-  const iosUrl = script.dataset.ios;
-  const androidUrl = script.dataset.android;
-  const fallback = (script.dataset.fallback as any) || "buttons";
-  const targetSelector = script.dataset.targetSelector || undefined;
-  const delayMs = script.dataset.delayms ? Number(script.dataset.delayms) : 0;
-  const redirect = script.dataset.redirect
-    ? script.dataset.redirect !== "false"
-    : true;
-
-  const heading = script.dataset.heading || "Get the app";
-  const iosLabel = script.dataset.iosLabel || "Download on the App Store";
-  const androidLabel = script.dataset.androidLabel || "Get it on Google Play";
-
-  const openInNewTab = script.dataset.newtab === "true";
-
-  const opts: Options = {
-    iosUrl,
-    androidUrl,
-    fallback,
-    targetSelector,
-    delayMs,
-    redirect,
-    heading,
-    iosLabel,
-    androidLabel,
-    openInNewTab,
+function normalizeOptions(options: Options): NormalizedOptions {
+  const opts: Required<Options> = {
+    fallback: options.fallback ?? "buttons",
+    delayMs: options.delayMs ?? 0,
+    redirect: options.redirect ?? true,
+    heading: options.heading ?? "Get the app",
+    iosLabel: options.iosLabel ?? "Download on the Apple App Store",
+    androidLabel: options.androidLabel ?? "Get it on Google Play",
+    openInNewTab: options.openInNewTab ?? false,
+    androidUrl: options.androidUrl ?? "",
+    iosUrl: options.iosUrl ?? "",
+    targetSelector: options.targetSelector ?? "",
   };
 
-  return opts;
+  return {
+    ...opts,
+    targetSelector: resolveTargetSelector(opts.targetSelector),
+  };
+}
+
+export function parseScriptOptions(script: HTMLScriptElement): Options {
+  const options: Options = {
+    iosUrl: script.dataset.ios,
+    androidUrl: script.dataset.android,
+    fallback: script.dataset.fallback as any,
+    targetSelector: script.dataset.targetSelector || undefined,
+    delayMs: script.dataset.delayms
+      ? Number(script.dataset.delayms)
+      : undefined,
+    redirect: script.dataset.redirect
+      ? script.dataset.redirect !== "false"
+      : undefined,
+    heading: script.dataset.heading,
+    iosLabel: script.dataset.iosLabel,
+    androidLabel: script.dataset.androidLabel,
+    openInNewTab: script.dataset.newtab === "true",
+  };
+
+  return options;
 }
 
 export function redirectOrRender(options: Options) {
-  // override defaults
-  const opts: Required<Options> = {
-    fallback: "buttons",
-    targetSelector: document.body,
-    delayMs: 0,
-    redirect: true,
-    heading: "Get the app",
-    iosLabel: "Download on the Apple App Store",
-    androidLabel: "Get it on Google Play",
-    openInNewTab: false,
-    androidUrl: "",
-    iosUrl: "",
-    ...options,
-  };
-
-  const targetEl = resolveTargetSelector(opts.targetSelector);
+  const opts = normalizeOptions(options);
+  const targetEl = opts.targetSelector;
 
   if (opts.fallback === "buttons") {
     renderButtons(targetEl, {
