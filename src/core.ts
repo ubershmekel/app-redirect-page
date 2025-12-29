@@ -11,7 +11,7 @@ export type Options = {
   redirect?: boolean; // default true; if false, always render buttons
 
   // copy / UI
-  heading?: string; // default "Get the app"
+  heading?: string; // default ""
   iosLabel?: string; // default "Download on the App Store"
   androidLabel?: string; // default "Get it on Google Play"
   openInNewTab?: boolean; // default false
@@ -76,9 +76,7 @@ function createBadgeLink(
   a.style.display = "block";
   a.style.padding = "8px 0";
   a.style.margin = "10px 0";
-  a.style.borderRadius = "10px";
   a.style.textDecoration = "none";
-  a.style.border = "1px solid transparent";
   a.style.background = "transparent";
   a.style.color = "inherit";
   if (openInNewTab) {
@@ -118,8 +116,6 @@ function renderButtons(
   container.style.maxWidth = "560px";
   container.style.margin = "24px auto";
   container.style.padding = "16px";
-  container.style.border = "1px solid rgba(0,0,0,0.12)";
-  container.style.borderRadius = "12px";
 
   const h = document.createElement("div");
   h.textContent = opts.heading;
@@ -158,7 +154,7 @@ function normalizeOptions(options: Options): NormalizedOptions {
     fallback: options.fallback ?? "buttons",
     delayMs: options.delayMs ?? 0,
     redirect: options.redirect ?? true,
-    heading: options.heading ?? "Get the app",
+    heading: options.heading ?? "",
     iosLabel: options.iosLabel ?? "Download on the Apple App Store",
     androidLabel: options.androidLabel ?? "Get it on Google Play",
     openInNewTab: options.openInNewTab ?? false,
