@@ -8,8 +8,7 @@
     "build:watch": "tsdown --sourcemap --watch",
     "serve": "http-server . -p 4173 -c-1",
     "dev": "concurrently \"npm:build:watch\" \"npm:serve\"",
-    "release": "node scripts/release.js",
-    "prepublishOnly": "npm run build"
+    "release": "node scripts/release.js"
   },
   "files": [
     "dist",
