@@ -34,19 +34,22 @@ export function detectOs(): "ios" | "android" | "other" {
   return "other";
 }
 
-function resolveTargetSelector(targetSelector?: string | Element): Element {
-  if (!targetSelector) {
-    const script = document.currentScript as HTMLScriptElement | null;
-    const container = document.createElement("div");
-    if (script?.parentNode) {
-      script.parentNode.insertBefore(container, script.nextSibling);
-    } else {
-      document.body.appendChild(container);
-    }
-    return container;
+function createAutoContainer(): Element {
+  const script = document.currentScript as HTMLScriptElement | null;
+  const container = document.createElement("div");
+  if (script?.parentNode) {
+    script.parentNode.insertBefore(container, script.nextSibling);
+  } else {
+    document.body.appendChild(container);
   }
+  return container;
+}
+
+function resolveTargetSelector(targetSelector?: string | Element): Element {
+  if (!targetSelector) return createAutoContainer();
   if (typeof targetSelector === "string") {
-    return document.querySelector(targetSelector) ?? document.body;
+    const found = document.querySelector(targetSelector);
+    return found ?? createAutoContainer();
   }
   return targetSelector;
 }
