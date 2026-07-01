@@ -1,4 +1,5 @@
 export type FallbackMode = "buttons" | "none";
+export type StylesMode = "default" | "none";
 
 export type Options = {
   iosUrl?: string;
@@ -6,18 +7,63 @@ export type Options = {
 
   // behavior
   fallback?: FallbackMode; // default "buttons"
-  targetSelector?: string | Element; // default: new element after current <script>
+  targetSelector?: string | Element; // default: render after current <script>
   delayMs?: number; // time until redirect occurs in ms, default 0
   redirect?: boolean; // default true; if false, always render buttons
+  styles?: StylesMode; // default "default"; set "none" for fully host-styled UI
 
   // copy / UI
   heading?: string; // default ""
   iosLabel?: string; // default "Download on the App Store"
   androidLabel?: string; // default "Get it on Google Play"
   openInNewTab?: boolean; // default false
+  className?: string; // optional extra classes on the fallback root
 };
 
-type NormalizedOptions = Required<Options> & { targetSelector: Element };
+type RenderTarget = {
+  element: Element;
+  mode: "append" | "after";
+};
+
+type NormalizedOptions = Required<Options> & { target: RenderTarget };
+
+const DEFAULT_STYLE_ID = "app-redirect-page-default-styles";
+
+function ensureDefaultStyles() {
+  if (document.getElementById(DEFAULT_STYLE_ID)) return;
+
+  const style = document.createElement("style");
+  style.id = DEFAULT_STYLE_ID;
+  style.textContent = `
+.app-redirect-page {
+  box-sizing: border-box;
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  max-width: 560px;
+  margin: 24px auto;
+  padding: 16px;
+}
+.app-redirect-page__heading {
+  font-size: 18px;
+  font-weight: 650;
+  margin-bottom: 12px;
+}
+.app-redirect-page__link {
+  display: block;
+  padding: 8px 0;
+  margin: 10px 0;
+  text-decoration: none;
+  background: transparent;
+  color: inherit;
+}
+.app-redirect-page__badge {
+  display: block;
+  height: 74px;
+  width: auto;
+}
+`;
+
+  (document.head || document.body).appendChild(style);
+}
 
 export function detectOs(): "ios" | "android" | "other" {
   const ua = navigator.userAgent || "";
@@ -34,24 +80,24 @@ export function detectOs(): "ios" | "android" | "other" {
   return "other";
 }
 
-function createAutoContainer(): Element {
+function createAutoTarget(): RenderTarget {
   const script = document.currentScript as HTMLScriptElement | null;
-  const container = document.createElement("div");
-  if (script?.parentNode) {
-    script.parentNode.insertBefore(container, script.nextSibling);
-  } else {
-    document.body.appendChild(container);
+  if (script) {
+    return { element: script, mode: "after" };
   }
-  return container;
+
+  return { element: document.body, mode: "append" };
 }
 
-function resolveTargetSelector(targetSelector?: string | Element): Element {
-  if (!targetSelector) return createAutoContainer();
+function resolveTargetSelector(targetSelector?: string | Element): RenderTarget {
+  if (!targetSelector) return createAutoTarget();
   if (typeof targetSelector === "string") {
     const found = document.querySelector(targetSelector);
-    return found ?? createAutoContainer();
+    return found
+      ? { element: found, mode: "append" }
+      : createAutoTarget();
   }
-  return targetSelector;
+  return { element: targetSelector, mode: "append" };
 }
 
 function doRedirect(url: string, delayMs: number) {
@@ -71,17 +117,14 @@ function createBadgeLink(
   href: string,
   label: string,
   imageFilename: string,
-  openInNewTab: boolean
+  openInNewTab: boolean,
+  platform: "ios" | "android"
 ) {
   const a = document.createElement("a");
   a.href = href;
+  a.className = `app-redirect-page__link app-redirect-page__link--${platform}`;
+  a.setAttribute("data-app-redirect-page-link", platform);
   a.setAttribute("aria-label", label);
-  a.style.display = "block";
-  a.style.padding = "8px 0";
-  a.style.margin = "10px 0";
-  a.style.textDecoration = "none";
-  a.style.background = "transparent";
-  a.style.color = "inherit";
   if (openInNewTab) {
     a.target = "_blank";
     a.rel = "noopener noreferrer";
@@ -89,15 +132,14 @@ function createBadgeLink(
   const img = document.createElement("img");
   img.src = resolveBadgeSrc(imageFilename);
   img.alt = label;
-  img.style.display = "block";
-  img.style.height = "74px";
-  img.style.width = "auto";
+  img.className = `app-redirect-page__badge app-redirect-page__badge--${platform}`;
+  img.setAttribute("data-app-redirect-page-badge", platform);
   a.appendChild(img);
   return a;
 }
 
 function renderButtons(
-  target: Element,
+  target: RenderTarget,
   opts: Required<
     Pick<
       Options,
@@ -107,33 +149,34 @@ function renderButtons(
       | "androidLabel"
       | "androidUrl"
       | "openInNewTab"
+      | "styles"
+      | "className"
     >
   >
 ) {
+  if (opts.styles === "default") ensureDefaultStyles();
+
   const container = document.createElement("div");
+  container.className = ["app-redirect-page", "app-redirect-page--fallback", opts.className]
+    .filter(Boolean)
+    .join(" ");
   container.setAttribute("data-app-redirect-page", "fallback");
 
-  // minimal inline styling so it looks decent anywhere
-  container.style.fontFamily =
-    "system-ui, -apple-system, Segoe UI, Roboto, sans-serif";
-  container.style.maxWidth = "560px";
-  container.style.margin = "24px auto";
-  container.style.padding = "16px";
-
-  const h = document.createElement("div");
-  h.textContent = opts.heading;
-  h.style.fontSize = "18px";
-  h.style.fontWeight = "650";
-  h.style.marginBottom = "12px";
-
-  container.appendChild(h);
+  if (opts.heading) {
+    const h = document.createElement("div");
+    h.className = "app-redirect-page__heading";
+    h.setAttribute("data-app-redirect-page-heading", "");
+    h.textContent = opts.heading;
+    container.appendChild(h);
+  }
   if (opts.iosUrl) {
     container.appendChild(
       createBadgeLink(
         opts.iosUrl,
         opts.iosLabel,
         "Download_on_the_App_Store_Badge.svg",
-        opts.openInNewTab
+        opts.openInNewTab,
+        "ios"
       )
     );
   }
@@ -143,13 +186,24 @@ function renderButtons(
         opts.androidUrl,
         opts.androidLabel,
         "GetItOnGooglePlay_Badge_Web_color_English.svg",
-        opts.openInNewTab
+        opts.openInNewTab,
+        "android"
       )
     );
   }
 
-  target.innerHTML = "";
-  target.appendChild(container);
+  if (target.mode === "after") {
+    const existing = target.element.nextElementSibling;
+    if (existing?.getAttribute("data-app-redirect-page") === "fallback") {
+      existing.remove();
+    }
+    target.element.parentNode?.insertBefore(container, target.element.nextSibling);
+    return;
+  }
+
+  const existing = target.element.querySelector('[data-app-redirect-page="fallback"]');
+  if (existing?.parentElement === target.element) existing.remove();
+  target.element.appendChild(container);
 }
 
 function normalizeOptions(options: Options): NormalizedOptions {
@@ -157,10 +211,12 @@ function normalizeOptions(options: Options): NormalizedOptions {
     fallback: options.fallback ?? "buttons",
     delayMs: options.delayMs ?? 0,
     redirect: options.redirect ?? true,
+    styles: options.styles ?? "default",
     heading: options.heading ?? "",
     iosLabel: options.iosLabel ?? "Download on the Apple App Store",
     androidLabel: options.androidLabel ?? "Get it on Google Play",
     openInNewTab: options.openInNewTab ?? false,
+    className: options.className ?? "",
     androidUrl: options.androidUrl ?? "",
     iosUrl: options.iosUrl ?? "",
     targetSelector: options.targetSelector ?? "",
@@ -168,7 +224,7 @@ function normalizeOptions(options: Options): NormalizedOptions {
 
   return {
     ...opts,
-    targetSelector: resolveTargetSelector(opts.targetSelector),
+    target: resolveTargetSelector(opts.targetSelector),
   };
 }
 
@@ -184,10 +240,12 @@ export function parseScriptOptions(script: HTMLScriptElement): Options {
     redirect: script.dataset.redirect
       ? script.dataset.redirect !== "false"
       : undefined,
+    styles: script.dataset.styles as StylesMode | undefined,
     heading: script.dataset.heading,
     iosLabel: script.dataset.iosLabel,
     androidLabel: script.dataset.androidLabel,
     openInNewTab: script.dataset.newtab === "true",
+    className: script.dataset.className,
   };
 
   return options;
@@ -195,16 +253,18 @@ export function parseScriptOptions(script: HTMLScriptElement): Options {
 
 export function redirectOrRender(options: Options) {
   const opts = normalizeOptions(options);
-  const targetEl = opts.targetSelector;
+  const target = opts.target;
 
   if (opts.fallback === "buttons") {
-    renderButtons(targetEl, {
+    renderButtons(target, {
       heading: opts.heading,
       iosLabel: opts.iosLabel,
       androidLabel: opts.androidLabel,
       iosUrl: opts.iosUrl,
       androidUrl: opts.androidUrl,
       openInNewTab: opts.openInNewTab,
+      styles: opts.styles,
+      className: opts.className,
     });
   }
   if (opts.redirect) {
@@ -214,6 +274,8 @@ export function redirectOrRender(options: Options) {
 
 function detectOsRedirect(opts: Required<Options>) {
   const os = detectOs();
-  if (os === "ios") return doRedirect(opts.iosUrl, opts.delayMs);
-  if (os === "android") return doRedirect(opts.androidUrl, opts.delayMs);
+  if (os === "ios" && opts.iosUrl) return doRedirect(opts.iosUrl, opts.delayMs);
+  if (os === "android" && opts.androidUrl) {
+    return doRedirect(opts.androidUrl, opts.delayMs);
+  }
 }
