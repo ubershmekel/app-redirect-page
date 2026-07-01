@@ -44,20 +44,20 @@ https://ubershmekel.github.io/zensnake/app/
 
 All options are set as `data-*` attributes on the script tag.
 
-| Attribute | Type | Default | Description |
-| --- | --- | --- | --- |
-| `data-ios` | string | - | iOS App Store URL |
-| `data-android` | string | - | Google Play URL |
-| `data-fallback` | `buttons` \| `none` | `buttons` | Render store buttons when not redirecting |
-| `data-target-selector` | string | after current `<script>` | CSS selector to append the fallback UI into |
-| `data-delayms` | number | `0` | Delay before redirect (milliseconds) |
-| `data-redirect` | boolean | `true` | If `false`, never redirect (always show buttons) |
-| `data-heading` | string | - | Optional heading text above buttons |
-| `data-ios-label` | string | `Download on the Apple App Store` | Accessible label for iOS badge |
-| `data-android-label` | string | `Get it on Google Play` | Accessible label for Android badge |
-| `data-newtab` | boolean | `false` | Open store links in a new tab |
-| `data-styles` | `default` \| `none` | `default` | Use built-in CSS classes, or render class hooks with no built-in CSS |
-| `data-class-name` | string | - | Extra class name(s) added to the fallback root |
+| Attribute              | Type                | Default                           | Description                                                          |
+| ---------------------- | ------------------- | --------------------------------- | -------------------------------------------------------------------- |
+| `data-ios`             | string              | -                                 | iOS App Store URL                                                    |
+| `data-android`         | string              | -                                 | Google Play URL                                                      |
+| `data-fallback`        | `buttons` \| `none` | `buttons`                         | Render store buttons when not redirecting                            |
+| `data-target-selector` | string              | after current `<script>`          | CSS selector to append the fallback UI into                          |
+| `data-delayms`         | number              | `0`                               | Delay before redirect (milliseconds)                                 |
+| `data-redirect`        | boolean             | `true`                            | If `false`, never redirect (always show buttons)                     |
+| `data-heading`         | string              | -                                 | Optional heading text above buttons                                  |
+| `data-ios-label`       | string              | `Download on the Apple App Store` | Accessible label for iOS badge                                       |
+| `data-android-label`   | string              | `Get it on Google Play`           | Accessible label for Android badge                                   |
+| `data-newtab`          | boolean             | `false`                           | Open store links in a new tab                                        |
+| `data-styles`          | `default` \| `none` | `default`                         | Use built-in CSS classes, or render class hooks with no built-in CSS |
+| `data-class-name`      | string              | -                                 | Extra class name(s) added to the fallback root                       |
 
 Example with options:
 
@@ -79,7 +79,10 @@ The fallback renders as a single root element by default, inserted immediately
 after the script tag:
 
 ```html
-<div class="app-redirect-page app-redirect-page--fallback" data-app-redirect-page="fallback">
+<div
+  class="app-redirect-page app-redirect-page--fallback"
+  data-app-redirect-page="fallback"
+>
   <a
     class="app-redirect-page__link app-redirect-page__link--ios"
     data-app-redirect-page-link="ios"

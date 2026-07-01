@@ -8,6 +8,8 @@
     "build:watch": "tsdown --sourcemap --watch",
     "serve": "http-server . -p 4173 -c-1",
     "dev": "concurrently \"npm:build:watch\" \"npm:serve\"",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
     "release": "node scripts/release.js"
   },
   "files": [
@@ -22,6 +24,7 @@
   "devDependencies": {
     "concurrently": "^9.2.1",
     "http-server": "^14.1.1",
+    "prettier": "^3.9.4",
     "tsdown": "^0.18.3"
   }
 }

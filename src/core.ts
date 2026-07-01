@@ -89,13 +89,13 @@ function createAutoTarget(): RenderTarget {
   return { element: document.body, mode: "append" };
 }
 
-function resolveTargetSelector(targetSelector?: string | Element): RenderTarget {
+function resolveTargetSelector(
+  targetSelector?: string | Element,
+): RenderTarget {
   if (!targetSelector) return createAutoTarget();
   if (typeof targetSelector === "string") {
     const found = document.querySelector(targetSelector);
-    return found
-      ? { element: found, mode: "append" }
-      : createAutoTarget();
+    return found ? { element: found, mode: "append" } : createAutoTarget();
   }
   return { element: targetSelector, mode: "append" };
 }
@@ -118,7 +118,7 @@ function createBadgeLink(
   label: string,
   imageFilename: string,
   openInNewTab: boolean,
-  platform: "ios" | "android"
+  platform: "ios" | "android",
 ) {
   const a = document.createElement("a");
   a.href = href;
@@ -152,12 +152,16 @@ function renderButtons(
       | "styles"
       | "className"
     >
-  >
+  >,
 ) {
   if (opts.styles === "default") ensureDefaultStyles();
 
   const container = document.createElement("div");
-  container.className = ["app-redirect-page", "app-redirect-page--fallback", opts.className]
+  container.className = [
+    "app-redirect-page",
+    "app-redirect-page--fallback",
+    opts.className,
+  ]
     .filter(Boolean)
     .join(" ");
   container.setAttribute("data-app-redirect-page", "fallback");
@@ -176,8 +180,8 @@ function renderButtons(
         opts.iosLabel,
         "Download_on_the_App_Store_Badge.svg",
         opts.openInNewTab,
-        "ios"
-      )
+        "ios",
+      ),
     );
   }
   if (opts.androidUrl) {
@@ -187,8 +191,8 @@ function renderButtons(
         opts.androidLabel,
         "GetItOnGooglePlay_Badge_Web_color_English.svg",
         opts.openInNewTab,
-        "android"
-      )
+        "android",
+      ),
     );
   }
 
@@ -197,11 +201,16 @@ function renderButtons(
     if (existing?.getAttribute("data-app-redirect-page") === "fallback") {
       existing.remove();
     }
-    target.element.parentNode?.insertBefore(container, target.element.nextSibling);
+    target.element.parentNode?.insertBefore(
+      container,
+      target.element.nextSibling,
+    );
     return;
   }
 
-  const existing = target.element.querySelector('[data-app-redirect-page="fallback"]');
+  const existing = target.element.querySelector(
+    '[data-app-redirect-page="fallback"]',
+  );
   if (existing?.parentElement === target.element) existing.remove();
   target.element.appendChild(container);
 }
